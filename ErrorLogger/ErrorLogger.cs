@@ -3,7 +3,7 @@
 ErrorLogger
 
 A library that logs unhandled application exceptions to a file.
-Copyright (C) 2018 VPKSoft, Petteri Kautonen
+Copyright (C) 2019 VPKSoft, Petteri Kautonen
 
 Contact: vpksoft@vpksoft.net
 
@@ -200,6 +200,15 @@ namespace VPKSoft.ErrorLogger
         /// </summary>
         public static event OnApplicationCrash ApplicationCrash = null;
 
+        /// <summary>
+        /// A delegate for the ApplicationCrashData event.
+        /// </summary>
+        public delegate void OnApplicationCrashData(ApplicationCrashEventArgs e);
+
+        /// <summary>
+        /// An event that is raised when the application is about to crash with additional exception data.
+        /// </summary>
+        public static event OnApplicationCrashData ApplicationCrashData = null;
 
         // if multiple instances of the application is running the instance number allows to prevent file access exceptions..
         private int instanceCount = 0;
@@ -315,6 +324,26 @@ namespace VPKSoft.ErrorLogger
         /// <summary>
         /// Logs an exception into the file "trace_error.log".
         /// </summary>
+        /// <param name="additionalMessage">An additional message to log with the exception.</param>
+        /// <param name="e">An exception which stack trace to log.</param>
+        public static void LogError(Exception e, string additionalMessage)
+        {
+            lock (_lock)
+            {
+                Trace.WriteLine("MESSAGE BEGIN ---------------------------------------------------------------------------------------------");
+                Trace.WriteLine("Application Error [" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "] (" + MainAppInfo.VersionString + " / " + MainAppInfo.Title + ")");
+                Trace.WriteLine("Error Message     [" + e.Message + "]");
+                Trace.WriteLine("Additional data   [" + additionalMessage + "]");
+                Trace.WriteLine("Stack trace:");
+                Trace.WriteLine(e.StackTrace);
+                Trace.WriteLine("MESSAGE END -----------------------------------------------------------------------------------------------");
+                Trace.WriteLine(string.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Logs an exception into the file "trace_error.log".
+        /// </summary>
         /// <param name="e">An exception which stack trace to log.</param>
         public static void LogError(Exception e)
         {
@@ -340,6 +369,19 @@ namespace VPKSoft.ErrorLogger
         {
             LogError((Exception)e.ExceptionObject);
             ApplicationCrash?.Invoke();
+
+            // raise the application crash with additional data if subscribed..
+            if (ApplicationCrashData != null)
+            {
+                var args = new ApplicationCrashEventArgs
+                {
+                    Exception = (Exception)e.ExceptionObject,
+                    IsTerminating = e.IsTerminating,
+                    Args = e,
+                    Sender = sender,
+                };
+                ApplicationCrashData?.Invoke(args);
+            }
         }
 
         /// <summary>

@@ -49,6 +49,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationCrashEventArags.cs" />
     <Compile Include="ErrorLogger.cs" />
     <Compile Include="MainAppInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

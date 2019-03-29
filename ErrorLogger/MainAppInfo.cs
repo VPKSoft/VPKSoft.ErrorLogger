@@ -3,7 +3,7 @@
 ErrorLogger
 
 A library that logs unhandled application exceptions to a file.
-Copyright (C) 2018 VPKSoft, Petteri Kautonen
+Copyright (C) 2019 VPKSoft, Petteri Kautonen
 
 Contact: vpksoft@vpksoft.net
 

@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("VPKSoft")]
 [assembly: AssemblyProduct("WPFTest")]
-[assembly: AssemblyCopyright("Copyright © VPKSoft 2018")]
+[assembly: AssemblyCopyright("Copyright © VPKSoft 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

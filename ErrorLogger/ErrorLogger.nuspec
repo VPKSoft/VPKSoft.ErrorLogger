@@ -10,8 +10,8 @@
     <iconUrl>https://www.vpksoft.net/site/VPKSoft.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Added static event called ApplicationCrash for the library.</releaseNotes>
-    <copyright>Copyright © VPKSoft 2018</copyright>
+    <releaseNotes>Added event ApplicationCrashData containing the exception data that will possibly crash the application. Added LogError method overload with additional message string.</releaseNotes>
+    <copyright>Copyright © VPKSoft 2019</copyright>
     <tags>log error application VPKSoft</tags>
     <license type="expression">LGPL-3.0-or-later</license>
   </metadata>
