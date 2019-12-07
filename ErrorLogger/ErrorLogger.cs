@@ -43,53 +43,53 @@ namespace VPKSoft.ErrorLogger
         /// <summary>
         /// FileStream for the "app_messages.log" file.
         /// </summary>
-        private FileStream fs = null;
+        private FileStream fs;
 
         /// <summary>
         /// StreamWriter for the "app_messages.log" file.
         /// </summary>
-        private StreamWriter sw = null;
+        private StreamWriter sw;
 
         /// <summary>
         /// FileStream for the "trace_error.log" file.
         /// </summary>
-        private FileStream fs_error = null;
+        private FileStream fsError;
 
         /// <summary>
         /// TextWriterTraceListener for the "trace_error.log" file.
         /// </summary>
-        private TextWriterTraceListener tw = null;
+        private TextWriterTraceListener tw;
 
         /// <summary>
         /// As this is a singleton class, we keep its instance here.
         /// </summary>
-        private static ExceptionLogger _Instance = null;
+        private static ExceptionLogger _instance;
 
         /// <summary>
         /// If the Bound() method was already called.
         /// </summary>
-        private static bool bound = false;
+        private static bool _bound;
 
         /// <summary>
         /// Log truncate thread. 
         /// </summary>
-        private static Thread logTruncation = null;
+        private static Thread _logTruncation;
 
         /// <summary>
         /// Thread start for log truncate thread. 
         /// </summary>
         /// 
-        private static ThreadStart logTruncationStart = null;
+        private static ThreadStart _logTruncationStart;
 
         /// <summary>
         /// Should the log truncate thread be running.
         /// </summary>
-        private static volatile bool logTruncationStopped = false;
+        private static volatile bool _logTruncationStopped;
 
         /// <summary>
         /// Dummy object of thread locking.
         /// </summary>
-        private static object _lock = new object();
+        private static readonly object Lock = new object();
 
 
         /// <summary>
@@ -97,9 +97,9 @@ namespace VPKSoft.ErrorLogger
         /// </summary>
         private static void MakeInstance()
         {
-            if (_Instance == null)
+            if (_instance == null)
             {
-                _Instance = new ExceptionLogger();
+                _instance = new ExceptionLogger();
             }
         }
 
@@ -114,13 +114,17 @@ namespace VPKSoft.ErrorLogger
         private static void Truncation()
         {
             int msCount = 0;
-            while (!logTruncationStopped)
+            while (!_logTruncationStopped)
             {                
                 Thread.Sleep(1000);
                 msCount++;
                 if (msCount > 3600)
                 {
-                    TrucateLog(10000, _Instance.instanceCount);
+                    if (_instance != null)
+                    {
+                        TruncateLog(10000, _instance.instanceCount);
+                    }
+
                     msCount = 0;
                 }
             }
@@ -133,16 +137,16 @@ namespace VPKSoft.ErrorLogger
         /// <para/>otherwise false.</param>
         private static void ToggleThreads(bool stop)
         {
-            logTruncationStopped = stop;
-            if (stop && logTruncation != null)
+            _logTruncationStopped = stop;
+            if (stop && _logTruncation != null)
             {
-                logTruncation.Join();
+                _logTruncation.Join();
             }
             else
             {
-                logTruncationStart = new ThreadStart(Truncation);
-                logTruncation = new Thread(logTruncationStart);
-                logTruncation.Start();
+                _logTruncationStart = Truncation;
+                _logTruncation = new Thread(_logTruncationStart);
+                _logTruncation.Start();
             }
         }
 
@@ -153,17 +157,17 @@ namespace VPKSoft.ErrorLogger
         /// </summary>
         public static void Bind()
         {
-            if (bound)
+            if (_bound)
             {
                 return;
             }
-            bound = true;
+            _bound = true;
             MakeInstance();
-            _Instance.CreateStreams();
+            _instance.CreateStreams();
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             if (!WPF)
             {
-                System.Windows.Forms.Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
+                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             }
         }
 
@@ -175,18 +179,18 @@ namespace VPKSoft.ErrorLogger
         /// <param name="instanceCount">If multiple instances of the application is running the instance number allows to prevent file access exceptions.</param>
         public static void Bind(int instanceCount)
         {
-            if (bound)
+            if (_bound)
             {
                 return;
             }
-            bound = true;
+            _bound = true;
             MakeInstance();
-            _Instance.instanceCount = instanceCount;
-            _Instance.CreateStreams();
+            _instance.instanceCount = instanceCount;
+            _instance.CreateStreams();
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             if (!WPF)
             {
-                System.Windows.Forms.Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
+                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             }
         }
 
@@ -198,7 +202,7 @@ namespace VPKSoft.ErrorLogger
         /// <summary>
         /// An event that is raised when the application is about to crash.
         /// </summary>
-        public static event OnApplicationCrash ApplicationCrash = null;
+        public static event OnApplicationCrash ApplicationCrash;
 
         /// <summary>
         /// A delegate for the ApplicationCrashData event.
@@ -208,10 +212,10 @@ namespace VPKSoft.ErrorLogger
         /// <summary>
         /// An event that is raised when the application is about to crash with additional exception data.
         /// </summary>
-        public static event OnApplicationCrashData ApplicationCrashData = null;
+        public static event OnApplicationCrashData ApplicationCrashData;
 
         // if multiple instances of the application is running the instance number allows to prevent file access exceptions..
-        private int instanceCount = 0;
+        private int instanceCount;
 
         /// <summary>
         /// Creates the streams for "trace_error.log" and "app_messages.log" files.
@@ -225,23 +229,26 @@ namespace VPKSoft.ErrorLogger
                 Directory.CreateDirectory(GetAppSettingsFolder());
             }
 
-            if (tw == null && bound)
+            if (tw == null && _bound)
             {
-                fs_error = new FileStream(logFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-                tw = new TextWriterTraceListener(fs_error, "error_log");
+                fsError = new FileStream(logFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                tw = new TextWriterTraceListener(fsError, "error_log");
 
                 Trace.Listeners.Add(tw);
                 Trace.AutoFlush = true;
             }
 
-            if (fs == null && bound)
+            if (fs == null && _bound)
             {
                 fs = new FileStream(appLogFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             }
 
-            if (sw == null && bound)
+            if (sw == null && _bound)
             {
-                sw = new StreamWriter(fs);
+                if (fs != null)
+                {
+                    sw = new StreamWriter(fs);
+                }
             }
         }
 
@@ -250,11 +257,11 @@ namespace VPKSoft.ErrorLogger
         /// </summary>
         public static void UnBind()
         {
-            if (_Instance != null)
+            if (_instance != null)
             {
-                _Instance.Dispose();
-                _Instance = null;
-                bound = false;
+                _instance.Dispose();
+                _instance = null;
+                _bound = false;
             }
         }
 
@@ -265,20 +272,20 @@ namespace VPKSoft.ErrorLogger
         /// <para/>Also lines which doesn't start with a string ""MESSAGE BEGIN"
         /// <para/>will be truncated.</param>
         /// <param name="instanceCount">If multiple instances of the application is running the instance number allows to prevent file access exceptions.</param>
-        private static void TrucateLog(int lineCount, int instanceCount)
+        private static void TruncateLog(int lineCount, int instanceCount)
         {
-            lock (_lock)
+            lock (Lock)
             {
 
                 string logFile = GetAppSettingsFolder() + "trace_error.log" + (instanceCount > 0 ? instanceCount.ToString() : string.Empty);
                 string appLogFile = GetAppSettingsFolder() + "app_messages.log" + (instanceCount > 0 ? instanceCount.ToString() : string.Empty);
                 try
                 {
-                    if (_Instance == null)
+                    if (_instance == null)
                     {
                         return;
                     }
-                    _Instance.DisposeStreams();
+                    _instance.DisposeStreams();
                     List<string> lines = new List<string>(File.ReadAllLines(appLogFile));
                     if (lines.Count > lineCount)
                     {
@@ -312,11 +319,11 @@ namespace VPKSoft.ErrorLogger
                         File.WriteAllLines(logFile, lines.ToArray());
                         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                     }
-                    _Instance.CreateStreams();
+                    _instance.CreateStreams();
                 }
                 catch
                 {
-
+                    // ignored..
                 }
             }
         }
@@ -328,8 +335,13 @@ namespace VPKSoft.ErrorLogger
         /// <param name="e">An exception which stack trace to log.</param>
         public static void LogError(Exception e, string additionalMessage)
         {
-            lock (_lock)
+            lock (Lock)
             {
+                if (_instance == null)
+                {
+                    return;
+                }
+
                 Trace.WriteLine("MESSAGE BEGIN ---------------------------------------------------------------------------------------------");
                 Trace.WriteLine("Application Error [" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "] (" + MainAppInfo.VersionString + " / " + MainAppInfo.Title + ")");
                 Trace.WriteLine("Error Message     [" + e.Message + "]");
@@ -347,7 +359,7 @@ namespace VPKSoft.ErrorLogger
         /// <param name="e">An exception which stack trace to log.</param>
         public static void LogError(Exception e)
         {
-            lock (_lock)
+            lock (Lock)
             {
                 Trace.WriteLine("MESSAGE BEGIN ---------------------------------------------------------------------------------------------");
                 Trace.WriteLine("Application Error [" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "] (" + MainAppInfo.VersionString + " / " + MainAppInfo.Title + ")");
@@ -359,6 +371,7 @@ namespace VPKSoft.ErrorLogger
             }
         }
 
+        // ReSharper disable once CommentTypo
         /// <summary>
         /// Writes a log message to a file called "trace_error.log" into a directory
         /// <para/>%LOCALAPPDATA%\[Application product name]
@@ -384,21 +397,27 @@ namespace VPKSoft.ErrorLogger
             }
         }
 
+        // ReSharper disable once CommentTypo
         /// <summary>
-        /// Logs an application message with a timestamp to a file called
+        /// Logs an application message with a time stamp to a file called
         /// <para/>"app_messages.log" at directory %LOCALAPPDATA%\[Application product name].
         /// </summary>
         /// <param name="message">A application message to log.</param>
         public static void LogMessage(string message)
         {
-            lock (_lock)
-            {                
-                _Instance.sw.WriteLine("MESSAGE BEGIN ---------------------------------------------------------------------------------------------");
-                _Instance.sw.WriteLine("Application Log   [" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "] (" + MainAppInfo.VersionString + " / " + MainAppInfo.Title + ")");
-                _Instance.sw.WriteLine("Message           [" + message + "]");
-                _Instance.sw.WriteLine("MESSAGE END -----------------------------------------------------------------------------------------------");
-                _Instance.sw.WriteLine(string.Empty);
-                _Instance.sw.Flush();
+            lock (Lock)
+            {
+                if (_instance == null)
+                {
+                    return;
+                }
+
+                _instance.sw.WriteLine("MESSAGE BEGIN ---------------------------------------------------------------------------------------------");
+                _instance.sw.WriteLine("Application Log   [" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "] (" + MainAppInfo.VersionString + " / " + MainAppInfo.Title + ")");
+                _instance.sw.WriteLine("Message           [" + message + "]");
+                _instance.sw.WriteLine("MESSAGE END -----------------------------------------------------------------------------------------------");
+                _instance.sw.WriteLine(string.Empty);
+                _instance.sw.Flush();
             }
         }
 
@@ -406,35 +425,19 @@ namespace VPKSoft.ErrorLogger
         /// <summary>
         /// True if the application is a ASP.NET application.
         /// </summary>
-        public static bool ASP
-        {
-            get
-            {
-                return System.Web.HttpContext.Current == null;
-            }
-        }
+        // ReSharper disable once InconsistentNaming
+        public static bool ASP => System.Web.HttpContext.Current == null;
 
         /// <summary>
         /// True if the application is a Windows Forms Application
         /// </summary>
-        public static bool WinForms
-        {
-            get
-            {
-                return System.Windows.Forms.Application.OpenForms.Count == 0;
-            }
-        }
+        public static bool WinForms => Application.OpenForms.Count == 0;
 
         /// <summary>
         /// True if the application is a Windows Presentation Foundation application
         /// </summary>
-        public static bool WPF
-        {
-            get
-            {
-                return System.Windows.Application.Current != null;
-            }
-        }
+        // ReSharper disable once InconsistentNaming
+        public static bool WPF => System.Windows.Application.Current != null;
 
         /// <summary>
         /// Just returns the default writable data directory for "non-roaming" applications.
@@ -444,7 +447,7 @@ namespace VPKSoft.ErrorLogger
         {
             if (!WPF)
             {
-                string appName = System.Windows.Forms.Application.ProductName;
+                string appName = Application.ProductName;
                 foreach (char chr in Path.GetInvalidFileNameChars())
                 {
                     appName = appName.Replace(chr, '_');
@@ -475,12 +478,12 @@ namespace VPKSoft.ErrorLogger
                 {
                     Trace.Listeners.Remove(tw);
                     tw.Dispose();
-                    fs_error.Dispose();
+                    fsError.Dispose();
                     tw = null;
                 }
                 catch
                 {
-
+                    // ignored..
                 }
             }
 
@@ -527,7 +530,7 @@ namespace VPKSoft.ErrorLogger
         ~ExceptionLogger()
         {
             Dispose();
-            bound = false;
+            _bound = false;
         }
     }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
     <id>$id$</id>
@@ -7,15 +7,16 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <projectUrl>https://www.vpksoft.net/2015-03-31-13-33-28/libraries/errorlogger</projectUrl>
-    <iconUrl>https://www.vpksoft.net/site/VPKSoft.ico</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>Added event ApplicationCrashData containing the exception data that will possibly crash the application. Added LogError method overload with additional message string.</releaseNotes>
     <copyright>Copyright © VPKSoft 2019</copyright>
     <tags>log error application VPKSoft</tags>
     <license type="expression">LGPL-3.0-or-later</license>
+    <icon>vpksoft_logo.png</icon>
   </metadata>
   <files>
     <file src="COPYING.LESSER" target="" />
+    <file src="vpksoft_logo.png" target="" />
   </files>
 </package>
