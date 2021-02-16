@@ -421,13 +421,6 @@ namespace VPKSoft.ErrorLogger
             }
         }
 
-
-        /// <summary>
-        /// True if the application is a ASP.NET application.
-        /// </summary>
-        // ReSharper disable once InconsistentNaming
-        public static bool ASP => System.Web.HttpContext.Current == null;
-
         /// <summary>
         /// True if the application is a Windows Forms Application
         /// </summary>

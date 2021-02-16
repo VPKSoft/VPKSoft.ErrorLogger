@@ -1,100 +1,76 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E4DC9279-3619-45D9-A5A4-7D842B85A0AD}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WinFormsTest</RootNamespace>
-    <AssemblyName>WinFormsTest</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <AssemblyTitle>WinFormsTest</AssemblyTitle>
+    <Company>VPKSoft</Company>
+    <Product>WinFormsTest</Product>
+    <Description>A sample application of the ErrorLogger library.</Description>
+    <Copyright>Copyright © VPKSoft 2021</Copyright>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>VPKSoft.ico</ApplicationIcon>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+    <Version>1.1.0</Version>
+    <PackageProjectUrl>https://www.vpksoft.net/2015-03-31-13-33-28/libraries/errorlogger</PackageProjectUrl>
+    <PackageIcon>vpksoft_logo.png</PackageIcon>
+    <RepositoryUrl>https://github.com/VPKSoft/VPKSoft.ErrorLogger</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>See: https://github.com/VPKSoft/VPKSoft.ErrorLogger</PackageReleaseNotes>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormMain.cs">
+    <Compile Update="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormMain.Designer.cs">
+    <Compile Update="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FormMain.resx">
+    <EmbeddedResource Update="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
+    <Compile Update="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="..\ErrorLogger\vpksoft_logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Compile Include="Properties\Settings.Designer.cs">
+    <Compile Update="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ErrorLogger\ErrorLogger.csproj">
-      <Project>{df241230-88ef-41a0-a515-8a6e3e00b217}</Project>
-      <Name>ErrorLogger</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\ErrorLogger\ErrorLogger.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="VPKSoft.ico" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
