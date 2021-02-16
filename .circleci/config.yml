@@ -16,7 +16,7 @@
      steps:
        - checkout
        - run: msbuild ErrorLogger/ErrorLogger.csproj /t:restore
-       - run: msbuild ErrorLogger/RpcSeErrorLoggerlf.csproj /p:Configuration=Release
+       - run: msbuild ErrorLogger/ErrorLogger.csproj /p:Configuration=Release
        - run: 
           name: Push to NuGet
           command: |
